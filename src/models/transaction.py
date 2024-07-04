@@ -13,4 +13,3 @@ class Transaction(Base):
     operation = relationship('Operation', back_populates='transaction')
     terminal = relationship('Terminal', back_populates='transaction')
     card = relationship('Card', back_populates='transaction')
-    

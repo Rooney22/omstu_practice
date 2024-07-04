@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 from src.models.base import Base
+from src.models.client import Client
 
 
 class Card(Base):

@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, status
-from fastapi.responses import Response
-from typing import List
-#from src.services.method import MethodsService
+from src.services.method import MethodsService
 
 #from src.services.authorization import get_current_user_data
 
@@ -11,3 +9,8 @@ router = APIRouter(
     tags=['methods'],
     #dependencies=[Depends(get_current_user_data)]
 )
+
+
+@router.post("/inputData", status_code=status.HTTP_200_OK, name="Ввод данных")
+def input_data(file: UploadFile, methods_service: MethodsService = Depends()):
+    return methods_service.insert(file.file)
