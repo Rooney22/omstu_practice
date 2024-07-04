@@ -6,8 +6,6 @@ from typing import List
 #from src.services.authorization import get_current_user_data
 
 
-
-
 router = APIRouter(
     prefix='/methods',
     tags=['methods'],

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, SmallInteger, String, ForeignKey, DateTime
 from src.models.base import Base
+from sqlalchemy.orm import relationship
 
 
 class Transaction(Base):
@@ -9,3 +10,7 @@ class Transaction(Base):
     transaction_date = Column(DateTime)
     card_number = Column(String(8), ForeignKey('cards.card_number'))
     operation_id = Column(Integer, ForeignKey('operations.operation_type'))
+    operation = relationship('Operation', back_populates='transaction')
+    terminal = relationship('Terminal', back_populates='transaction')
+    card = relationship('Card', back_populates='transaction')
+    

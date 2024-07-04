@@ -6,7 +6,7 @@ app = FastAPI(
     title="Знаев Алексей. Backend",
     description="Финальный проект",
     version="0.1.0",
-    openapi_tags=tags_dict,
+    #openapi_tags=tags_dict,
 )
 
 app.include_router(router)
