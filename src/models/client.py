@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Date
 from src.models.base import Base
-from sqlalchemy.orm import relationship
 
 
 class Client(Base):

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 from src.core.settings import settings
 from sqlalchemy.engine import URL
@@ -22,7 +22,6 @@ Session = sessionmaker(
     autocommit=False,
     autoflush=False,
 )
-
 
 def get_session():
     session = Session()
