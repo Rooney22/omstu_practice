@@ -7,3 +7,4 @@ class Client(Base):
     client_id = Column(String(7), primary_key=True)
     passport_hashed = Column(String(8))
     passport_valid_to = Column(Date)
+    date_of_birth = Column(Date)

@@ -40,7 +40,7 @@ class MethodsService:
                     )
             if not card:
                 card = self.create_card(card_number, row['phone'], row['client'], row['passport'],
-                                        passport_valid_to)
+                                        passport_valid_to, row['date_of_birth'])
             operation_result = operation_res_map[row['operation_result']]
             operation = (self.session
                          .query(Operation)
@@ -65,27 +65,27 @@ class MethodsService:
                                       card_number=card_number,
                                       operation_id=operation.operation_id,
                                       terminal_id=terminal.terminal_id)
-            if int(index) % 100 == 0:
+            if int(index) % 50 == 0:
                 print(index)
             self.session.add(transaction)
             self.session.commit()
 
-    def create_card(self, card_number, phone_hashed, client_id, passport_hashed, passport_valid_to):
+    def create_card(self, card_number, phone_hashed, client_id, passport_hashed, passport_valid_to, date_of_birth):
         client = (self.session
                   .query(Client)
-                  .filter(Client.passport_hashed == passport_hashed)
-                  .filter(Client.passport_valid_to == passport_valid_to)
+                  .filter(Client.client_id == client_id)
                   .first()
                   )
         if not client:
-            client = self.create_client(client_id, passport_hashed, passport_valid_to)
+            client = self.create_client(client_id, passport_hashed, passport_valid_to, date_of_birth)
         card = Card(card_number=card_number, phone_hashed=phone_hashed, client_id=client.client_id)
         self.session.add(card)
         self.session.commit()
         return card
 
-    def create_client(self, client_id, passport_hashed, passport_valid_to):
-        client = Client(client_id=client_id, passport_hashed=passport_hashed, passport_valid_to=passport_valid_to)
+    def create_client(self, client_id, passport_hashed, passport_valid_to, date_of_birth):
+        client = Client(client_id=client_id, passport_hashed=passport_hashed, passport_valid_to=passport_valid_to,
+                        date_of_birth=date_of_birth)
         self.session.add(client)
         self.session.commit()
         return client
