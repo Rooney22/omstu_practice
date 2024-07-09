@@ -12,5 +12,5 @@ router = APIRouter(
 
 
 @router.post("/inputData", status_code=status.HTTP_200_OK, name="Ввод данных")
-def input_data(file: UploadFile, methods_service: MethodsService = Depends()):
-    return methods_service.insert(file.file)
+async def input_data(file: UploadFile, methods_service: MethodsService = Depends()):
+    return await methods_service.insert(file.file)

@@ -1,6 +1,6 @@
 from fastapi import Depends
 from typing import BinaryIO
-from src.db.db import Session, get_session
+from src.db.db import Session
 from src.models.city import City
 from src.models.card import Card
 from src.models.terminal import Terminal
@@ -9,136 +9,131 @@ from src.models.operation import Operation
 from src.models.operation_type import OperationType
 from src.models.terminal_type import TerminalType
 from src.models.client import Client
+from sqlalchemy import select
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 
 
 class MethodsService:
-    def __init__(self, session: Session = Depends(get_session)):
-        self.session = session
 
-    def insert(self, input_file: BinaryIO):
+    async def insert(self, input_file: BinaryIO):
         df = pd.read_csv(input_file)
         operation_res_map = {
-            'Успешно' : True,
-            'Отказ' : False
+            'Успешно': True,
+            'Отказ': False
         }
-        for index, row in df.iterrows():
-            transaction_id = row['id_transaction']
-            if self.session.query(Transaction).filter(Transaction.transaction_id == transaction_id).first():
-                continue
-            transaction_date = row['date']
-            card_number = row['card']
-            passport_valid_to = row['passport_valid_to']
-            if passport_valid_to == 'бессрочно':
-                passport_valid_to = datetime.now() + relativedelta(years=100)
-            card = (self.session
-                    .query(Card)
-                    .filter(Card.card_number == card_number)
-                    .first()
-                    )
-            if not card:
-                card = self.create_card(card_number, row['phone'], row['client'], row['passport'],
-                                        passport_valid_to, row['date_of_birth'])
-            operation_result = operation_res_map[row['operation_result']]
-            operation = (self.session
-                         .query(Operation)
-                         .filter(Operation.operation_type.has(OperationType.operation_type_name == row['operation_type']))
-                         .filter(Operation.operation_result == operation_result)
-                         .filter(Operation.operation_amount == row['amount'])
-                         .first()
-                         )
-            if not operation:
-                operation = self.create_operation(row['operation_type'], operation_result, row['amount'])
-            terminal = (self.session
-                         .query(Terminal)
-                         .filter(Terminal.city.has(City.city_name == row['city']))
-                         .filter(Terminal.terminal_type.has(TerminalType.terminal_type_name == row['terminal_type']))
-                         .filter(Terminal.terminal_address == row['address'])
-                         .first()
-                         )
-            if not terminal:
-                terminal = self.create_terminal(row['terminal_type'], row['city'], row['address'])
-            transaction = Transaction(transaction_id=transaction_id,
-                                      transaction_date=transaction_date,
-                                      card_number=card_number,
-                                      operation_id=operation.operation_id,
-                                      terminal_id=terminal.terminal_id)
-            if int(index) % 50 == 0:
-                print(index)
-            self.session.add(transaction)
-            self.session.commit()
+        async with Session() as session:
+            for index, row in df.iterrows():
+                transaction_id = row['id_transaction']
+                transaction = await (session.get(Transaction, transaction_id))
+                if int(index) % 100 == 0:
+                    print(index)
+                if transaction:
+                    continue
+                transaction_date = datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S")
+                card_number = row['card']
+                if row['passport_valid_to'] == 'бессрочно':
+                    passport_valid_to = datetime.now() + relativedelta(years=100)
+                else:
+                    passport_valid_to = datetime.strptime(row['passport_valid_to'], "%Y-%m-%d")
+                card = await session.get(Card, card_number)
+                if not card:
+                    card = await self.create_card(card_number, row['phone'], row['client'], row['passport'],
+                                                  passport_valid_to, row['date_of_birth'], session)
+                operation_result = operation_res_map[row['operation_result']]
+                q = (select(Operation)
+                     .where(Operation.operation_type.has(OperationType.operation_type_name == row['operation_type']))
+                     .where(Operation.operation_result == operation_result)
+                     .where(Operation.operation_amount == row['amount']))
+                result = await session.execute(q)
+                operation = result.scalar_one_or_none()
+                if not operation:
+                    operation = await self.create_operation(row['operation_type'], operation_result, row['amount'],
+                                                            session)
+                q = (select(Terminal)
+                     .where(Terminal.terminal_type
+                            .has(TerminalType.terminal_type_name == row['terminal_type']))
+                     .where(Terminal.city.has(City.city_name == row['city']))
+                     .where(Terminal.terminal_address == row['address']))
+                result = await session.execute(q)
+                terminal = result.scalar_one_or_none()
+                if not terminal:
+                    terminal = await self.create_terminal(row['terminal_type'], row['city'], row['address'],
+                                                          session)
+                transaction = Transaction(transaction_id=transaction_id,
+                                          transaction_date=transaction_date,
+                                          card_number=card_number,
+                                          operation_id=operation.operation_id,
+                                          terminal_id=terminal.terminal_id)
+                session.add(transaction)
+                await session.flush()
+            await session.commit()
 
-    def create_card(self, card_number, phone_hashed, client_id, passport_hashed, passport_valid_to, date_of_birth):
-        client = (self.session
-                  .query(Client)
-                  .filter(Client.client_id == client_id)
-                  .first()
-                  )
+    async def create_card(self, card_number, phone_hashed, client_id, passport_hashed, passport_valid_to, date_of_birth,
+                          session):
+        client = await session.get(Client, client_id)
         if not client:
-            client = self.create_client(client_id, passport_hashed, passport_valid_to, date_of_birth)
+            client = await self.create_client(client_id, passport_hashed, passport_valid_to, date_of_birth, session)
         card = Card(card_number=card_number, phone_hashed=phone_hashed, client_id=client.client_id)
-        self.session.add(card)
-        self.session.commit()
+        session.add(card)
+        await session.flush()
         return card
 
-    def create_client(self, client_id, passport_hashed, passport_valid_to, date_of_birth):
+    async def create_client(self, client_id, passport_hashed, passport_valid_to, date_of_birth, session):
         client = Client(client_id=client_id, passport_hashed=passport_hashed, passport_valid_to=passport_valid_to,
-                        date_of_birth=date_of_birth)
-        self.session.add(client)
-        self.session.commit()
+                        date_of_birth=datetime.strptime(date_of_birth, "%Y-%m-%d"))
+        session.add(client)
+        await session.flush()
         return client
 
-    def create_operation(self, operation_type_name, operation_result, operation_amount):
-        operation_type = (self.session
-                          .query(OperationType)
-                          .filter(OperationType.operation_type_name == operation_type_name)
-                          ).first()
+    async def create_operation(self, operation_type_name, operation_result, operation_amount, session):
+        q = (select(OperationType).where(OperationType.operation_type_name == operation_type_name))
+        result = await session.execute(q)
+        operation_type = result.scalar_one_or_none()
         if not operation_type:
-            operation_type = self.create_operation_type(operation_type_name)
+            operation_type = await self.create_operation_type(operation_type_name, session)
+
         operation = Operation(operation_type_id=operation_type.operation_type_id,
                               operation_amount=operation_amount,
                               operation_result=operation_result,
                               )
-        self.session.add(operation)
-        self.session.commit()
+        session.add(operation)
+        await session.flush()
         return operation
 
-    def create_operation_type(self, operation_type_name):
+    async def create_operation_type(self, operation_type_name, session):
         operation_type = OperationType(operation_type_name=operation_type_name)
-        self.session.add(operation_type)
-        self.session.commit()
+        session.add(operation_type)
+        await session.flush()
         return operation_type
 
-    def create_terminal(self, terminal_type_name, city_name, terminal_address):
-        terminal_type = (self.session
-                         .query(TerminalType)
-                         .filter(TerminalType.terminal_type_name == terminal_type_name)
-                         ).first()
+    async def create_terminal(self, terminal_type_name, city_name, terminal_address, session):
+        q = (select(TerminalType).where(TerminalType.terminal_type_name == terminal_type_name))
+        result = await session.execute(q)
+        terminal_type = result.scalar_one_or_none()
         if not terminal_type:
-            terminal_type = self.create_terminal_type(terminal_type_name)
-        city = (self.session
-                .query(City)
-                .filter(City.city_name == city_name)
-                ).first()
+            terminal_type = await self.create_terminal_type(terminal_type_name, session)
+        q = (select(City).where(City.city_name == city_name))
+        result = await session.execute(q)
+        city = result.scalar_one_or_none()
         if not city:
-            city = self.create_city(city_name)
+            city = await self.create_city(city_name, session)
         terminal = Terminal(terminal_type_id=terminal_type.terminal_type_id,
                             city_id=city.city_id,
                             terminal_address=terminal_address)
-        self.session.add(terminal)
-        self.session.commit()
+        session.add(terminal)
+        await session.flush()
         return terminal
 
-    def create_terminal_type(self, terminal_type_name):
-        terminal_type = OperationType(terminal_type_name=terminal_type_name)
-        self.session.add(terminal_type)
-        self.session.commit()
+    async def create_terminal_type(self, terminal_type_name, session):
+        terminal_type = TerminalType(terminal_type_name=terminal_type_name)
+        session.add(terminal_type)
+        await session.flush()
         return terminal_type
 
-    def create_city(self, city_name):
+    async def create_city(self, city_name, session):
         city = City(city_name=city_name)
-        self.session.add(city)
-        self.session.commit()
+        session.add(city)
+        await session.flush()
         return city
