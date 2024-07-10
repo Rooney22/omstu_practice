@@ -6,3 +6,6 @@ pydantic-settings
 pandas
 psycopg2
 asyncpg
+numpy
+scikit-learn
+
