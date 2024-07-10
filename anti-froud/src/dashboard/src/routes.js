@@ -5,22 +5,22 @@ import Insert from "views/examples/Insert.js";
 var routes = [
   {
     path: "/index",
-    name: "Dashboard",
+    name: "Дашборд",
     icon: "ni ni-tv-2 text-primary",
     component: <Index />,
     layout: "/admin",
   },
   {
     path: "/tables",
-    name: "Tables",
+    name: "Данные",
     icon: "ni ni-bullet-list-67 text-red",
     component: <Tables />,
     layout: "/admin",
   },
   {
     path: "/insert",
-    name: "Insert",
-    icon: "ni ni-bullet-list-67 text-red",
+    name: "Загрузка данных",
+    icon: "ni ni-fat-add text-green",
     component: <Insert />,
     layout: "/admin",
   }
