@@ -12,6 +12,6 @@ async def input_data(predict_service: PredictService = Depends()):
     return await predict_service.predict_all()
 
 
-@router.post("/predict_not_null", status_code=status.HTTP_200_OK, name="Предсказать метки незаполненных транзакций")
+@router.post("/predict_null", status_code=status.HTTP_200_OK, name="Предсказать метки незаполненных транзакций")
 async def input_data(predict_service: PredictService = Depends()):
-    return await predict_service.predict_not_null()
+    return await predict_service.predict_null()

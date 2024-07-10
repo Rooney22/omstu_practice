@@ -50,24 +50,18 @@ class PredictService:
 
         return pd.read_sql_query(query, conn)
 
-    @staticmethod
-    def pandas_query_not_null(session):
-        conn = session.connection()
-        query = select(PredictView).where(PredictView.fraud_probability.is_not(None))
-        return pd.read_sql_query(query, conn)
-
-    async def predict(self, df, session):
+    async def predict(self, df, null=False):
         df['date'] = pd.to_datetime(df['date'])
         df.sort_values(by=['card', 'date'], inplace=True)
         df['prev_date'] = df.groupby('card')['date'].shift()
         df['time_difference_seconds'] = (df['date'] - df['prev_date']).dt.total_seconds()
         df['time_difference_seconds'] = (df['time_difference_seconds']
-        .replace(
-            np.nan,
-            np.mean(df['time_difference_seconds']))
-        )
+            .replace(
+                np.nan,
+                np.mean(df['time_difference_seconds']))
+            )
         df = df[['id_transaction', 'date', 'card', 'date_of_birth', 'operation_type', 'amount', 'operation_result',
-                 'terminal_type', 'city', 'time_difference_seconds']]
+                 'terminal_type', 'city', 'time_difference_seconds', 'fraud_probability']]
         df['date_of_birth'] = pd.to_datetime(df['date_of_birth'])
         df['age'] = (df['date'].dt.year - df['date_of_birth'].dt.year).astype(int)
         df = df.drop('date_of_birth', axis=1)
@@ -81,28 +75,37 @@ class PredictService:
         df.loc[(df['prev_city'] != df['city']) & (df['prev_city'] != -1), 'factor_city'] = 0.8
         df['amount_factor'] = df['amount'].apply(self.find_amount_factor)
         df['age_factor'] = df['age'].apply(self.find_age_factor)
-        df_factors = df[['age_factor', 'amount_factor', 'factor_city', 'factor_hour', 'factor_time_dif']]
+        if null:
+            df = df.loc[df['fraud_probability'].isnull()]
+        df_factors = df[['id_transaction', 'age_factor', 'amount_factor', 'factor_city', 'factor_hour',
+                         'factor_time_dif']]
         result = []
         for index, row in df_factors.iterrows():
-            factors = sorted(list(row), reverse=True)
+            factors = sorted(list(row[1:]), reverse=True)
             now_factor = 0.0
             for factor in factors:
                 now_factor += (1.0 - now_factor) * factor
             result.append(now_factor)
-        df['fraud_probability'] = result
-        for index, row in df.iterrows():
-            q = (update(Transaction)
-                 .where(Transaction.transaction_id == row['id_transaction'])
-                 .values(transaction_fraud_probability=row['fraud_probability']))
-            await session.execute(q)
-        await session.commit()
+        return result
 
     async def predict_all(self):
         async with Session() as session:
             df = await session.run_sync(self.pandas_query)
-            await self.predict(df, session)
+            result = await self.predict(df)
+            for index, probability in result:
+                q = (update(Transaction)
+                     .where(Transaction.transaction_id == index)
+                     .values(transaction_fraud_probability=probability))
+                await session.execute(q)
+            await session.commit()
 
-    async def predict_not_null(self):
+    async def predict_null(self):
         async with Session() as session:
-            df = await session.run_sync(self.pandas_query_not_null)
-            await self.predict(df, session)
+            df = await session.run_sync(self.pandas_query)
+            result = await self.predict(df, null=True)
+            for index, probability in result:
+                q = (update(Transaction)
+                     .where(Transaction.transaction_id == index)
+                     .values(transaction_fraud_probability=probability))
+                await session.execute(q)
+            await session.commit()
