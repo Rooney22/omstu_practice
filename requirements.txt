@@ -1,2 +1,8 @@
 sqlalchemy
 pydantic
+fastapi
+uvicorn
+pydantic-settings
+pandas
+psycopg2
+asyncpg
