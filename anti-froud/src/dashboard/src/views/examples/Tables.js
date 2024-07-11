@@ -1,36 +1,12 @@
-import ReactDOM from 'react-dom';
+import React, {useState} from 'react';
 import cubejs from '@cubejs-client/core';
 import { QueryRenderer } from '@cubejs-client/react';
-import { Spin } from 'antd';
-import React from 'react';
-import { Line, Bar, Pie } from 'react-chartjs-2';
+import { Table, Spin } from 'antd';
 import { useDeepCompareMemo } from 'use-deep-compare';
-import { Row, Col, Statistic, Table } from 'antd';
+import Header from "components/Headers/Header.js";
+import { Container } from 'reactstrap';
 
-const COLORS_SERIES = [
-  '#5b8ff9',
-  '#5ad8a6',
-  '#5e7092',
-  '#f6bd18',
-  '#6f5efa',
-  '#6ec8ec',
-  '#945fb9',
-  '#ff9845',
-  '#299796',
-  '#fe99c3',
-];
-const PALE_COLORS_SERIES = [
-  '#d7e3fd',
-  '#daf5e9',
-  '#d6dbe4',
-  '#fdeecd',
-  '#dad8fe',
-  '#dbf1fa',
-  '#e4d7ed',
-  '#ffe5d2',
-  '#cce5e4',
-  '#ffe6f0',
-];
+import './Tables.css';
 
 const formatTableData = (columns, data) => {
   function flatten(columns = []) {
@@ -48,7 +24,7 @@ const formatTableData = (columns, data) => {
   }, {});
 
   function formatValue(value, { type, format } = {}) {
-    if (value == undefined) {
+    if (value === undefined) {
       return value;
     }
 
@@ -81,6 +57,17 @@ const formatTableData = (columns, data) => {
 };
 
 const TableRenderer = ({ resultSet, pivotConfig }) => {
+  const [filteredData, setFilteredData] = useState([]);
+  const [amountFilter, setAmountFilter] = useState('');
+  const [operationResultFilter, setOperationResultFilter] = useState('');
+  const [cardFilter, setCardFilter] = useState('');
+  const [clientFilter, setClientFilter] = useState('');
+  const [passportFilter, setPassportFilter] = useState('');
+  const [phoneFilter, setPhoneFilter] = useState('');
+  const [operationTypeFilter, setOperationTypeFilter] = useState('');
+  const [terminalTypeFilter, setTerminalTypeFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+
   const [tableColumns, dataSource] = useDeepCompareMemo(() => {
     const columns = resultSet.tableColumns(pivotConfig);
     return [
@@ -88,8 +75,63 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
       formatTableData(columns, resultSet.tablePivot(pivotConfig)),
     ];
   }, [resultSet, pivotConfig]);
+
+  const handleOperationResultFilterChange = (e) => {
+    const filterValue = e.target.value;
+    console.log(filterValue)
+    setOperationResultFilter(filterValue);
+    applyFilters();
+  };
+
+  const rowClassName = (record, index) => {
+    return record['table_view.amount'] > 100 ? 'red-row' : '';
+  };
+
+  const handleAmountFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setAmountFilter(filterValue);
+    applyFilters();
+  };
+
+  const applyFilters = () => {
+    const newFilteredData = dataSource.filter((record) => {
+      return (
+        (amountFilter === '' || record['table_view.amount'] >= parseFloat(amountFilter)) &&
+        (operationResultFilter === '' || record['table_view.operation_result'] === operationResultFilter) &&
+        (cardFilter === '' || record['table_view.card'] === cardFilter) &&
+        (clientFilter === '' || record['table_view.client'] === clientFilter) &&
+        (passportFilter === '' || record['table_view.passport'] === passportFilter) &&
+        (phoneFilter === '' || record['table_view.phone'] === phoneFilter) &&
+        (operationTypeFilter === '' || record['table_view.operation_type'] === operationTypeFilter) &&
+        (terminalTypeFilter === '' || record['table_view.terminal_type'] === terminalTypeFilter) &&
+        (cityFilter === '' || record['table_view.city'] === cityFilter)
+      );
+    });
+    setFilteredData(newFilteredData);
+  };
+
   return (
-    <Table pagination={false} columns={tableColumns} dataSource={dataSource} />
+    <>
+    <input
+    type="number"
+    placeholder="Filter by amount"
+    onChange={handleAmountFilterChange}
+  />
+  <input
+        type="text"
+        placeholder="Filter by operation result"
+        onChange={handleOperationResultFilterChange}
+        
+      />
+
+    <Table
+      pagination={true}
+      columns={tableColumns}
+      dataSource={filteredData}
+      scroll={{ x: 1500 }}
+      rowClassName={rowClassName} 
+    />
+    </>
   );
 };
 
@@ -114,9 +156,11 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
 
 const Tables = () => {
   return (
+    <>
+    <Header />
+    <Container>
     <QueryRenderer
       query={{
-        "limit":500,
   "dimensions": [
     "table_view.amount",
     "table_view.operation_result",
@@ -165,7 +209,10 @@ const Tables = () => {
 }
       })}
     />
+    </Container>
+    </>
   );
+
 };
 
 export default Tables;
