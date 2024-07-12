@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 
 
-class MethodsService:
+class DataService:
 
     async def insert(self, input_file: BinaryIO) -> None:
         df = pd.read_csv(input_file)

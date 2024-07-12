@@ -8,7 +8,7 @@ import numpy as np
 from typing import List, Tuple
 
 
-class PredictService:
+class FraudService:
 
     def __init__(self):
         self.mlservice = MLService()
