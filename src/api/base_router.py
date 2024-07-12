@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-from src.api import method
-from src.api import predict
+from src.api import data
+from src.api import fraud
 
 router = APIRouter()
 
-router.include_router(method.router)
+router.include_router(data.router)
 
-router.include_router(predict.router)
+router.include_router(fraud.router)
