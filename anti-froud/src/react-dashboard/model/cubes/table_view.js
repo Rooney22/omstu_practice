@@ -74,7 +74,7 @@ cube(`table_view`, {
     },
     fraud_probability: {
       sql: `fraud_probability`,
-      type: `time`
+      type: `number`
     }
   },
   

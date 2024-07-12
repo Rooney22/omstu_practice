@@ -34,7 +34,12 @@ cube(`transactions`, {
     transaction_date: {
       sql: `transaction_date`,
       type: `time`
-    }
+    },
+    fraud_probability:{
+      sql: `fraud_probability`,
+      type: `number`,
+      primaryKey: true
+    },
   },
   
   measures: {

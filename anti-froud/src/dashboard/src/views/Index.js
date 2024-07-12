@@ -25,6 +25,7 @@ import { Line, Bar } from "react-chartjs-2";
 
 
 import ChartTrasactions from "components/charts/ChartTransactions.js";
+import ChartPie from "components/charts/ChartPie.js";
 // reactstrap components
 import {
   Button,
@@ -68,7 +69,7 @@ const Index = (props) => {
     <>
       <Header />
       {/* Page content */}
-      <Container className="mt--7" fluid>
+      <Container className="mt--5" fluid>
         <Row>
           <Col className="mb-5 mb-xl-0" xl="8">
             <Card className="bg-gradient-default shadow">
@@ -95,19 +96,16 @@ const Index = (props) => {
                 <Row className="align-items-center">
                   <div className="col">
                     <h6 className="text-uppercase text-muted ls-1 mb-1">
-                      Performance
+                      Операции
                     </h6>
-                    <h2 className="mb-0">Total orders</h2>
+                    <h2 className="mb-0">Распределение fraud транзакций</h2>
                   </div>
                 </Row>
               </CardHeader>
               <CardBody>
                 {/* Chart */}
                 <div className="chart">
-                  <Bar
-                    data={chartExample2.data}
-                    options={chartExample2.options}
-                  />
+                  <ChartPie/>
                 </div>
               </CardBody>
             </Card>
