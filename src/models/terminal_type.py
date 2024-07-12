@@ -1,11 +1,10 @@
 from sqlalchemy import Column, SmallInteger, String, UniqueConstraint
 from src.models.base import Base
-from sqlalchemy.orm import relationship
 
 
 class TerminalType(Base):
     __tablename__ = 'terminal_types'
-    __table_args__ =(
+    __table_args__ = (
         UniqueConstraint(
             'terminal_type_name',
             name='terminal_types_unique'

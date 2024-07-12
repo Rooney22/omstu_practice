@@ -9,11 +9,6 @@ class Settings(BaseSettings):
     base_host: str
     base_port: int
     base_name: str
-    jwt_secret: str
-    jwt_algorithm: str
-    jwt_expires_seconds: int
-    admin_username: str
-    admin_password: str
 
 
 settings = Settings(

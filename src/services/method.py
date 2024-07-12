@@ -1,4 +1,3 @@
-from fastapi import Depends
 from typing import BinaryIO
 from src.db.db import Session
 from src.models.city import City
@@ -17,7 +16,7 @@ import pandas as pd
 
 class MethodsService:
 
-    async def insert(self, input_file: BinaryIO):
+    async def insert(self, input_file: BinaryIO) -> None:
         df = pd.read_csv(input_file)
         operation_res_map = {
             'Успешно': True,
@@ -70,8 +69,8 @@ class MethodsService:
                 await session.flush()
             await session.commit()
 
-    async def create_card(self, card_number, phone_hashed, client_id, passport_hashed, passport_valid_to, date_of_birth,
-                          session):
+    async def create_card(self, card_number: str, phone_hashed: str, client_id: str, passport_hashed: str,
+                          passport_valid_to: datetime, date_of_birth: datetime, session: Session) -> Card:
         client = await session.get(Client, client_id)
         if not client:
             client = await self.create_client(client_id, passport_hashed, passport_valid_to, date_of_birth, session)
@@ -80,14 +79,17 @@ class MethodsService:
         await session.flush()
         return card
 
-    async def create_client(self, client_id, passport_hashed, passport_valid_to, date_of_birth, session):
+    @staticmethod
+    async def create_client(client_id: str, passport_hashed: str, passport_valid_to: datetime,
+                            date_of_birth: datetime, session: Session) -> Client:
         client = Client(client_id=client_id, passport_hashed=passport_hashed, passport_valid_to=passport_valid_to,
                         date_of_birth=datetime.strptime(date_of_birth, "%Y-%m-%d"))
         session.add(client)
         await session.flush()
         return client
 
-    async def create_operation(self, operation_type_name, operation_result, operation_amount, session):
+    async def create_operation(self, operation_type_name: str, operation_result: bool, operation_amount: float,
+                               session: Session) -> Operation:
         q = (select(OperationType).where(OperationType.operation_type_name == operation_type_name))
         result = await session.execute(q)
         operation_type = result.scalar_one_or_none()
@@ -102,13 +104,15 @@ class MethodsService:
         await session.flush()
         return operation
 
-    async def create_operation_type(self, operation_type_name, session):
+    @staticmethod
+    async def create_operation_type(operation_type_name: str, session: Session) -> OperationType:
         operation_type = OperationType(operation_type_name=operation_type_name)
         session.add(operation_type)
         await session.flush()
         return operation_type
 
-    async def create_terminal(self, terminal_type_name, city_name, terminal_address, session):
+    async def create_terminal(self, terminal_type_name: str, city_name: str, terminal_address: str,
+                              session: Session) -> Terminal:
         q = (select(TerminalType).where(TerminalType.terminal_type_name == terminal_type_name))
         result = await session.execute(q)
         terminal_type = result.scalar_one_or_none()
@@ -126,13 +130,15 @@ class MethodsService:
         await session.flush()
         return terminal
 
-    async def create_terminal_type(self, terminal_type_name, session):
+    @staticmethod
+    async def create_terminal_type(terminal_type_name: str, session: Session) -> TerminalType:
         terminal_type = TerminalType(terminal_type_name=terminal_type_name)
         session.add(terminal_type)
         await session.flush()
         return terminal_type
 
-    async def create_city(self, city_name, session):
+    @staticmethod
+    async def create_city(city_name: str, session: Session) -> City:
         city = City(city_name=city_name)
         session.add(city)
         await session.flush()

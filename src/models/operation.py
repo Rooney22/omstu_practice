@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Numeric, ForeignKey, Boolean, UniqueConstraint
 from src.models.base import Base
 from sqlalchemy.orm import relationship
+
 from src.models.operation_type import OperationType
 
 
