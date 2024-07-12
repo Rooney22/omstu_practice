@@ -8,4 +8,7 @@ psycopg2
 asyncpg
 numpy
 scikit-learn
+python-dateutil
+pyod
+suod
 

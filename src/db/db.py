@@ -1,5 +1,4 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from src.core.settings import settings
 from sqlalchemy.engine import URL
 
@@ -12,6 +11,7 @@ connection_string = URL.create(
     port=settings.base_port,
     database=settings.base_name,
 )
+
 
 engine = create_async_engine(
     connection_string

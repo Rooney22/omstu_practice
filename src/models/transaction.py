@@ -2,10 +2,10 @@ from sqlalchemy import Column, Integer, Numeric, String, ForeignKey
 from src.models.base import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TIMESTAMP
+
 from src.models.card import Card
 from src.models.terminal import Terminal
 from src.models.operation import Operation
-
 
 
 class Transaction(Base):

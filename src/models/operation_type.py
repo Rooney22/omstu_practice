@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, UniqueConstraint
 from src.models.base import Base
-from sqlalchemy.orm import relationship
 
 
 class OperationType(Base):

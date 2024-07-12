@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, SmallInteger, String, ForeignKey, UniqueConstraint
 from src.models.base import Base
 from sqlalchemy.orm import relationship
+
 from src.models.terminal_type import TerminalType
 from src.models.city import City
 
