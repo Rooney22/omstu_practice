@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
-import cubejs from '@cubejs-client/core';
+import React, { useState, useEffect } from 'react';
+import cube from '@cubejs-client/core'; 
 import { QueryRenderer } from '@cubejs-client/react';
 import { Table, Spin } from 'antd';
 import { useDeepCompareMemo } from 'use-deep-compare';
 import Header from "components/Headers/Header.js";
 import { Container } from 'reactstrap';
-import { Input, Row, Col } from 'reactstrap';
+import { Input, Row, Col, Button } from 'reactstrap';
 
 import './Tables.css';
 
@@ -42,8 +42,12 @@ const formatTableData = (columns, data) => {
     if (type === 'number' && format === 'percent') {
       return [parseFloat(value).toFixed(2), '%'].join('');
     }
-
-    return value.toString();
+    if(value !== null){
+      return value.toString();
+    }else{
+      return "null";
+    }
+    
   }
 
   function format(row) {
@@ -59,112 +63,86 @@ const formatTableData = (columns, data) => {
 
 const TableRenderer = ({ resultSet, pivotConfig }) => {
   const [filteredData, setFilteredData] = useState([]);
-  const [amountFilter, setAmountFilter] = useState('');
-  const [operationResultFilter, setOperationResultFilter] = useState('');
-  const [cardFilter, setCardFilter] = useState('');
-  const [clientFilter, setClientFilter] = useState('');
-  const [passportFilter, setPassportFilter] = useState('');
-  const [phoneFilter, setPhoneFilter] = useState('');
-  const [operationTypeFilter, setOperationTypeFilter] = useState('');
-  const [terminalTypeFilter, setTerminalTypeFilter] = useState('');
-  const [cityFilter, setCityFilter] = useState('');
+  const [filters, setFilters] = useState({
+    amount: '',
+    operationResult: '',
+    card: '',
+    client: '',
+    passport: '',
+    phone: '',
+    operationType: '',
+    terminalType: '',
+    city: '',
+    fraud_probability: ''
+  });
 
   const [tableColumns, dataSource] = useDeepCompareMemo(() => {
+    
     const columns = resultSet.tableColumns(pivotConfig);
     return [
       columns,
       formatTableData(columns, resultSet.tablePivot(pivotConfig)),
     ];
   }, [resultSet, pivotConfig]);
-
-  const handleOperationResultFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setOperationResultFilter(filterValue);
-    applyFilters();
+  
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [filterName]: value
+    }));
   };
 
-  const handlecardFilterFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setCardFilter(filterValue);
-    applyFilters();
-  };
-
-  const handleclientFilterFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setClientFilter(filterValue);
-    applyFilters();
-  };
-
-  const handlepassportFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setPassportFilter(filterValue);
-    applyFilters();
-  };
-
-  const handlephoneFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setPhoneFilter(filterValue);
-    applyFilters();
-  };
-
-  const handleoperationTypeFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setOperationTypeFilter(filterValue);
-    applyFilters();
-  };
-  const handleterminalTypeFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setTerminalTypeFilter(filterValue);
-    applyFilters();
-  };
-  const handlecityFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setCityFilter(filterValue);
-    applyFilters();
-  };
-
-  const rowClassName = (record, index) => {
-    return record['table_view.amount'] > 100 ? 'red-row' : '';
-  };
-
-  const handleAmountFilterChange = (e) => {
-    const filterValue = e.target.value;
-    setAmountFilter(filterValue);
-    applyFilters();
-  };
+  useEffect(() => {
+    setFilteredData(dataSource);
+  }, [dataSource]);
 
   const applyFilters = () => {
     const newFilteredData = dataSource.filter((record) => {
       return (
-        (amountFilter === '' || record['table_view.amount'] >= parseFloat(amountFilter)) &&
-        (operationResultFilter === '' || record['table_view.operation_result'] === operationResultFilter) &&
-        (cardFilter === '' || record['table_view.card'] === cardFilter) &&
-        (clientFilter === '' || record['table_view.client'] === clientFilter) &&
-        (passportFilter === '' || record['table_view.passport'] === passportFilter) &&
-        (phoneFilter === '' || record['table_view.phone'] === phoneFilter) &&
-        (operationTypeFilter === '' || record['table_view.operation_type'] === operationTypeFilter) &&
-        (terminalTypeFilter === '' || record['table_view.terminal_type'] === terminalTypeFilter) &&
-        (cityFilter === '' || record['table_view.city'] === cityFilter)
+        (filters.amount === '' || record['table_view.amount'] >= parseFloat(filters.amount)) &&
+        (filters.operationResult === '' || record['table_view.operation_result'] === filters.operationResult) &&
+        (filters.card === '' || record['table_view.card'] === filters.card) &&
+        (filters.client === '' || record['table_view.client'] === filters.client) &&
+        (filters.passport === '' || record['table_view.passport'] === filters.passport) &&
+        (filters.phone === '' || record['table_view.phone'] === filters.phone) &&
+        (filters.operationType === '' || record['table_view.operation_type'] === filters.operationType) &&
+        (filters.terminalType === '' || record['table_view.terminal_type'] === filters.terminalType) &&
+        (filters.city === '' || record['table_view.city'] === filters.city) &&
+        (filters.fraud_probability === '' || record['table_view.fraud_probability'] >= parseFloat(filters.fraud_probability))
       );
     });
     setFilteredData(newFilteredData);
   };
 
+  const rowClassName = (record, index) => {
+    if (record['table_view.fraud_probability'] >= 0.8 ){
+      return 'red-row';
+    }else if (record['table_view.fraud_probability'] >= 0.6 && record['table_view.fraud_probability'] < 0.8){
+      return 'orange-row';
+    }else if(record['table_view.fraud_probability'] > 0.4 && record['table_view.fraud_probability'] < 0.6){
+      return 'yellow-row';
+    }else{
+      return '';
+    }
+    
+  };
+
   return (
     <>
-           <Row>
+      <Row>
         <Col md="6">
           <Input
             type="number"
             placeholder="Filter by amount"
-            onChange={handleAmountFilterChange}
+            onChange={(e) => handleFilterChange('amount', e.target.value)}
           />
         </Col>
+
         <Col md="6">
           <Input
             type="text"
             placeholder="Filter by operation result"
-            onChange={handleOperationResultFilterChange}
+            onChange={(e) => handleFilterChange('operationResult', e.target.value)}
           />
         </Col>
       </Row>
@@ -173,14 +151,14 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
           <Input
             type="text"
             placeholder="Filter by card"
-            onChange={handlecardFilterFilterChange}
+            onChange={(e) => handleFilterChange('card', e.target.value)}
           />
         </Col>
         <Col md="6">
           <Input
             type="text"
             placeholder="Filter by client"
-            onChange={handleclientFilterFilterChange}
+            onChange={(e) => handleFilterChange('client', e.target.value)}
           />
         </Col>
       </Row>
@@ -189,14 +167,14 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
           <Input
             type="text"
             placeholder="Filter by passport"
-            onChange={handlepassportFilterChange}
+            onChange={(e) => handleFilterChange('passport', e.target.value)}
           />
         </Col>
         <Col md="6">
           <Input
             type="text"
             placeholder="Filter by phone"
-            onChange={handlephoneFilterChange}
+            onChange={(e) => handleFilterChange('phone', e.target.value)}
           />
         </Col>
       </Row>
@@ -205,14 +183,14 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
           <Input
             type="text"
             placeholder="Filter by operation type"
-            onChange={handleoperationTypeFilterChange}
+            onChange={(e) => handleFilterChange('operationType', e.target.value)}
           />
         </Col>
         <Col md="6">
           <Input
             type="text"
             placeholder="Filter by terminal type"
-            onChange={handleterminalTypeFilterChange}
+            onChange={(e) => handleFilterChange('terminalType', e.target.value)}
           />
         </Col>
       </Row>
@@ -221,29 +199,38 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
           <Input
             type="text"
             placeholder="Filter by city"
-            onChange={handlecityFilterChange}
+            onChange={(e) => handleFilterChange('city', e.target.value)}
           />
         </Col>
-        {/* Add other input fields here */}
-      </Row>
 
-    <Table
-      pagination={true}
-      columns={tableColumns}
-      dataSource={filteredData}
-      scroll={{ x: 1500 }}
-      rowClassName={rowClassName} 
-    />
+        <Col md="6">
+          <Input
+            type="number"
+            placeholder="Filter by fraud_probability"
+            onChange={(e) => handleFilterChange('fraud_probability', e.target.value)}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="6">
+          <Button outline color="primary" onClick={applyFilters}>Применить фильтры</Button>
+        </Col>
+      </Row>
+      <Table
+        pagination={true}
+        columns={tableColumns}
+        dataSource={filteredData}
+        scroll={{ x: 1500 }}
+        rowClassName={rowClassName}
+      />
     </>
   );
 };
 
-
-const cubejsApi = cubejs(
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA1Mjg4MzcsImV4cCI6MTcyMDYxNTIzN30.R57wAhAbaeVq8sqEL_P-yRcplGbBy2k2TVAJCwtpEec',
-  { apiUrl: 'http://localhost:4000/cubejs-api/v1' }
+const cubejsApi = cube(
+  'eyJhbciOiJIUzI1NiR5cCI6IkpXVCJ9.eyJleHAiOjE3MjI0NzAzOTksImlzcyI6ImN1YmVjbG91ZCJ9.btLWvzpZIOSCOoZLMzhPAhA5Ubi6NOvhwmiITdSXdfk',
+  { apiUrl: 'https://gold-sawfish.aws-us-east-1.cubecloudapp.dev/cubejs-api/v1' }
 );
-
 const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) => {
   if (error) {
     return <div>{error.toString()}</div>;
@@ -254,67 +241,64 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
   }
 
   return <TableRenderer resultSet={resultSet} pivotConfig={pivotConfig} />;
-
 };
 
 const Tables = () => {
   return (
     <>
-    <Header />
-    <QueryRenderer
-      query={{
-  "dimensions": [
-    "table_view.amount",
-    "table_view.operation_result",
-    "table_view.card",
-    "table_view.client",
-    "table_view.client",
-    "table_view.passport",
-    "table_view.phone",
-    "table_view.operation_type",
-    "table_view.terminal_type",
-    "table_view.city",
-    "table_view.terminal",
-    "table_view.passport_valid_to",
-    "table_view.date_of_birth",
-    "table_view.date"
-  ],
-  "order": {
-    "table_view.amount": "asc"
-  }
-}}
-      cubejsApi={cubejsApi}
-      resetResultSetOnChange={false}
-      render={(props) => renderChart({
-        ...props,
-        chartType: 'table',
-        pivotConfig: {
-  "x": [
-    "amount",
-    "operation_result",
-    "card",
-    "client",
-    "client",
-    "passport",
-    "phone",
-    "operation_type",
-    "terminal_type",
-    "city",
-    "terminal",
-    "passport_valid_to",
-    "date_of_birth",
-    "date"
-  ],
-  "y": [],
-  "fillMissingDates": true,
-  "joinDateRange": false
-}
-      })}
-    />
-
+      <Header />
+      <QueryRenderer
+        query={{
+          "dimensions": [
+            "table_view.amount",
+            "table_view.operation_result",
+            "table_view.card",
+            "table_view.client",
+            "table_view.passport",
+            "table_view.phone",
+            "table_view.operation_type",
+            "table_view.terminal_type",
+            "table_view.city",
+            "table_view.terminal",
+            "table_view.passport_valid_to",
+            "table_view.date_of_birth",
+            "table_view.date",
+            "table_view.fraud_probability"
+          ],
+          "order": {
+            "table_view.amount": "asc"
+          }
+        }}
+        cubejsApi={cubejsApi}
+        resetResultSetOnChange={false}
+        render={(props) => renderChart({
+          ...props,
+          chartType: 'table',
+          pivotConfig: {
+            "x": [
+              "amount",
+              "operation_result",
+              "card",
+              "client",
+              "passport",
+              "phone",
+              "operation_type",
+              "terminal_type",
+              "city",
+              "terminal",
+              "passport_valid_to",
+              "date_of_birth",
+              "date",
+              "fraud_probability"
+            ],
+            "y": [],
+            "fillMissingDates": false,
+            "joinDateRange": false,
+          }
+        })}
+      />
     </>
   );
-
 };
 
 export default Tables;

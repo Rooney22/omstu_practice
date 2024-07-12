@@ -71,6 +71,10 @@ cube(`table_view`, {
     date: {
       sql: `date`,
       type: `time`
+    },
+    fraud_probability: {
+      sql: `fraud_probability`,
+      type: `time`
     }
   },
   

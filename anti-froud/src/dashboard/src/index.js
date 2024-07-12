@@ -11,10 +11,10 @@ import AdminLayout from "layouts/Admin.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
   
-const cubeApi = cube(
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA1NDU2MTF9.ZF9v00q8slbSPeZUwIxGUDb9VkhsTF3yx3YAQ3mbvLg',
-  { apiUrl: 'https://gold-sawfish.aws-us-east-1.cubecloudapp.dev/cubejs-api/v1' }
-);
+const cubeApi = cube( 
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA3Njk5ODl9.ir0jgyxdr7Q-EEJ6rKoMSvJbuF-g4tsLPckf0JULv-s', 
+  { apiUrl: 'https://gold-sawfish.aws-us-east-1.cubecloudapp.dev/dev-mode/dev--3f5c11ba/cubejs-api/v1' } 
+); 
 
 root.render(
   <CubeProvider cubeApi={cubeApi}>

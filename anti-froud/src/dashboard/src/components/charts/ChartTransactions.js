@@ -1,12 +1,10 @@
-import ReactDOM from 'react-dom';
 import cubejs from '@cubejs-client/core';
 import { QueryRenderer } from '@cubejs-client/react';
 import { Spin } from 'antd';
 import React from 'react';
-import { Line, Bar, Pie } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import { useDeepCompareMemo } from 'use-deep-compare';
-import { Row, Col, Statistic, Table } from 'antd';
-
+import cube from '@cubejs-client/core'; 
 const COLORS_SERIES = [
   '#5b8ff9',
   '#5ad8a6',
@@ -117,11 +115,10 @@ const LineChartRenderer = ({
 };
 
 
-const cubejsApi = cubejs(
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA1Mjg4MzcsImV4cCI6MTcyMDYxNTIzN30.R57wAhAbaeVq8sqEL_P-yRcplGbBy2k2TVAJCwtpEec',
-    { apiUrl: 'http://localhost:4000/cubejs-api/v1' }
-  );
-
+const cubejsApi = cube(
+  'eyJhbciOiJIUzI1NiR5cCI6IkpXVCJ9.eyJleHAiOjE3MjI0NzAzOTksImlzcyI6ImN1YmVjbG91ZCJ9.btLWvzpZIOSCOoZLMzhPAhA5Ubi6NOvhwmiITdSXdfk',
+  { apiUrl: 'https://gold-sawfish.aws-us-east-1.cubecloudapp.dev/cubejs-api/v1' }
+);
 const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) => {
 
   console.log(resultSet)
@@ -161,7 +158,7 @@ const ChartTrasactions = () => {
   ]
 }}
       cubejsApi={cubejsApi}
-      resetResultSetOnChange={false}
+      resetResultSetOnChange={true}
       render={(props) => renderChart({
         ...props,
         chartType: 'line',
@@ -172,7 +169,7 @@ const ChartTrasactions = () => {
   "y": [
     "measures"
   ],
-  "fillMissingDates": true,
+  "fillMissingDates": false,
   "joinDateRange": false
 }
       })}
