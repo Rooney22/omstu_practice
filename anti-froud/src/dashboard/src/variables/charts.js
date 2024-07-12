@@ -192,16 +192,16 @@ function chartOptions() {
         defaultColor: mode === "dark" ? colors.gray[700] : colors.gray[600],
         defaultFontColor: mode === "dark" ? colors.gray[700] : colors.gray[600],
         defaultFontFamily: fonts.base,
-        defaultFontSize: 13,
+        defaultFontSize: 14,
         layout: {
-          padding: 0,
+          padding: 10,
         },
         legend: {
           display: false,
           position: "bottom",
           labels: {
             usePointStyle: true,
-            padding: 16,
+            padding: 0,
           },
         },
         elements: {
@@ -270,7 +270,7 @@ function chartOptions() {
       zeroLineBorderDashOffset: [2],
     },
     ticks: {
-      beginAtZero: true,
+      beginAtZero: false,
       padding: 10,
       callback: function (value) {
         if (!(value % 10)) {
@@ -288,7 +288,7 @@ function chartOptions() {
       drawTicks: false,
     },
     ticks: {
-      padding: 20,
+      padding: 40,
     },
   });
 

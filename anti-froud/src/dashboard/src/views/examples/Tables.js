@@ -5,6 +5,7 @@ import { Table, Spin } from 'antd';
 import { useDeepCompareMemo } from 'use-deep-compare';
 import Header from "components/Headers/Header.js";
 import { Container } from 'reactstrap';
+import { Input, Row, Col } from 'reactstrap';
 
 import './Tables.css';
 
@@ -78,8 +79,47 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
 
   const handleOperationResultFilterChange = (e) => {
     const filterValue = e.target.value;
-    console.log(filterValue)
     setOperationResultFilter(filterValue);
+    applyFilters();
+  };
+
+  const handlecardFilterFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setCardFilter(filterValue);
+    applyFilters();
+  };
+
+  const handleclientFilterFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setClientFilter(filterValue);
+    applyFilters();
+  };
+
+  const handlepassportFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setPassportFilter(filterValue);
+    applyFilters();
+  };
+
+  const handlephoneFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setPhoneFilter(filterValue);
+    applyFilters();
+  };
+
+  const handleoperationTypeFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setOperationTypeFilter(filterValue);
+    applyFilters();
+  };
+  const handleterminalTypeFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setTerminalTypeFilter(filterValue);
+    applyFilters();
+  };
+  const handlecityFilterChange = (e) => {
+    const filterValue = e.target.value;
+    setCityFilter(filterValue);
     applyFilters();
   };
 
@@ -112,17 +152,80 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
 
   return (
     <>
-    <input
-    type="number"
-    placeholder="Filter by amount"
-    onChange={handleAmountFilterChange}
-  />
-  <input
-        type="text"
-        placeholder="Filter by operation result"
-        onChange={handleOperationResultFilterChange}
-        
-      />
+           <Row>
+        <Col md="6">
+          <Input
+            type="number"
+            placeholder="Filter by amount"
+            onChange={handleAmountFilterChange}
+          />
+        </Col>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by operation result"
+            onChange={handleOperationResultFilterChange}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by card"
+            onChange={handlecardFilterFilterChange}
+          />
+        </Col>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by client"
+            onChange={handleclientFilterFilterChange}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by passport"
+            onChange={handlepassportFilterChange}
+          />
+        </Col>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by phone"
+            onChange={handlephoneFilterChange}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by operation type"
+            onChange={handleoperationTypeFilterChange}
+          />
+        </Col>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by terminal type"
+            onChange={handleterminalTypeFilterChange}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="6">
+          <Input
+            type="text"
+            placeholder="Filter by city"
+            onChange={handlecityFilterChange}
+          />
+        </Col>
+        {/* Add other input fields here */}
+      </Row>
 
     <Table
       pagination={true}
@@ -158,7 +261,6 @@ const Tables = () => {
   return (
     <>
     <Header />
-    <Container>
     <QueryRenderer
       query={{
   "dimensions": [
@@ -209,7 +311,7 @@ const Tables = () => {
 }
       })}
     />
-    </Container>
+
     </>
   );
 
