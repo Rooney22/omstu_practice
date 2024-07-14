@@ -107,7 +107,6 @@ class FraudService:
             for index, probability in result:
                 if i % 100 == 0:
                     await session.commit()
-                    print(i)
                 q = (update(Transaction)
                      .where(Transaction.transaction_id == index)
                      .values(transaction_fraud_probability=probability))

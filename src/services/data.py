@@ -19,7 +19,7 @@ class DataService:
 
     async def insert(self, input_file: BinaryIO) -> None:
         sniffer = csv.Sniffer()
-        delimiter = sniffer.sniff(input_file.read(5000).decode('utf-8')).delimiter
+        delimiter = sniffer.sniff(input_file.readline().decode('utf-8')).delimiter
         input_file.seek(0)
         df = pd.read_csv(input_file, sep=str(delimiter))
         operation_res_map = {
@@ -33,8 +33,6 @@ class DataService:
                     continue
                 transaction_id = row['id_transaction']
                 transaction = await (session.get(Transaction, transaction_id))
-                if int(index) % 100 == 0:
-                    print(index)
                 if transaction:
                     continue
                 transaction_date = datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S")
