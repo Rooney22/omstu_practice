@@ -49,6 +49,7 @@ class MLService:
                     'operation_type', 'operation_result', 'terminal_type']]
         df_ml = pd.get_dummies(df_ml, columns=['operation_type', 'operation_result', 'terminal_type'])
         transformer_path = Path(f"ML/transformer/{transformer_info['file_name']}")
+        transformer_path.parent.mkdir(parents=True, exist_ok=True)
         if transformer_path.is_file():
             with open(transformer_path, 'rb') as file:
                 transformer = pickle.load(file)
@@ -62,6 +63,7 @@ class MLService:
     @staticmethod
     async def predict_model(X: np.ndarray, model_info: dict, weight: float) -> np.ndarray:
         model_path = Path(f"ML/model/{model_info['file_name']}")
+        model_path.parent.mkdir(parents=True, exist_ok=True)
         if model_path.is_file():
             with open(model_path, 'rb') as file:
                 model = pickle.load(file)
