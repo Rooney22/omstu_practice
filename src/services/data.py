@@ -12,18 +12,25 @@ from sqlalchemy import select
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
+import csv
 
 
 class DataService:
 
     async def insert(self, input_file: BinaryIO) -> None:
-        df = pd.read_csv(input_file)
+        sniffer = csv.Sniffer()
+        delimiter = sniffer.sniff(input_file.read(5000).decode('utf-8')).delimiter
+        input_file.seek(0)
+        df = pd.read_csv(input_file, sep=str(delimiter))
         operation_res_map = {
             'Успешно': True,
             'Отказ': False
         }
         async with Session() as session:
             for index, row in df.iterrows():
+                check = await self.check_rows(row)
+                if not check:
+                    continue
                 transaction_id = row['id_transaction']
                 transaction = await (session.get(Transaction, transaction_id))
                 if int(index) % 100 == 0:
@@ -68,6 +75,18 @@ class DataService:
                 session.add(transaction)
                 await session.flush()
             await session.commit()
+
+    @staticmethod
+    async def check_rows(row: pd.Series) -> bool:
+        if len(str(row['client'])) > 7:
+            return False
+        if len(str(row['passport'])) > 8:
+            return False
+        if len(str(row['card'])) > 8:
+            return False
+        if len(str(row['phone'])) > 8:
+            return False
+        return True
 
     async def create_card(self, card_number: str, phone_hashed: str, client_id: str, passport_hashed: str,
                           passport_valid_to: datetime, date_of_birth: datetime, session: Session) -> Card:
