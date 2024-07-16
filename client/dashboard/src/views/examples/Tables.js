@@ -117,9 +117,9 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
   const rowClassName = (record, index) => {
     if (record['table_view.fraud_probability'] >= 0.8 ){
       return 'red-row';
-    }else if (record['table_view.fraud_probability'] >= 0.6 && record['table_view.fraud_probability'] < 0.8){
+    }else if (record['table_view.fraud_probability'] >= 0.7 && record['table_view.fraud_probability'] < 0.8){
       return 'orange-row';
-    }else if(record['table_view.fraud_probability'] > 0.4 && record['table_view.fraud_probability'] < 0.6){
+    }else if(record['table_view.fraud_probability'] > 0.5 && record['table_view.fraud_probability'] < 0.7){
       return 'yellow-row';
     }else{
       return '';
@@ -211,11 +211,13 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
           />
         </Col>
       </Row>
+      <br />
       <Row>
         <Col md="6">
           <Button outline color="primary" onClick={applyFilters}>Применить фильтры</Button>
         </Col>
       </Row>
+      <br />
       <Table
         pagination={true}
         columns={tableColumns}
@@ -247,6 +249,7 @@ const Tables = () => {
   return (
     <>
       <Header />
+      <Container className="mt-1" fluid>
       <QueryRenderer
         query={{
           "dimensions": [
@@ -297,6 +300,7 @@ const Tables = () => {
           }
         })}
       />
+      </Container>
     </>
   );
 };

@@ -1,11 +1,8 @@
-import ReactDOM from 'react-dom';
 import cubejs from '@cubejs-client/core';
 import { QueryRenderer } from '@cubejs-client/react';
 import { Spin } from 'antd';
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
-import { useDeepCompareMemo } from 'use-deep-compare';
-import { Table } from 'antd';
 
 const COLORS_SERIES = [
   '#5b8ff9',
@@ -27,7 +24,8 @@ const commonOptions = {
   },
   plugins: {
     legend: {
-      position: 'bottom',
+      position: 'top', 
+      display: true,
     },
   },
   scales: {
@@ -41,7 +39,6 @@ const commonOptions = {
     },
   },
 };
-
 const useDrilldownCallback = ({
   datasets,
   labels,
@@ -51,15 +48,13 @@ const useDrilldownCallback = ({
   return React.useCallback(
     (elements) => {
       if (elements.length <= 0) return;
-      const { datasetIndex, index } = elements[0];
-      const { yValues } = datasets[datasetIndex];
+      const { index } = elements[0];
       const xValues = [labels[index]];
 
       if (typeof onDrilldownRequested === 'function') {
         onDrilldownRequested(
           {
             xValues,
-            yValues,
           },
           pivotConfig
         );
@@ -71,22 +66,39 @@ const useDrilldownCallback = ({
 
 
 const PieChartRenderer = ({ resultSet, pivotConfig, onDrilldownRequested }) => {
+  
   const data = {
-    labels: resultSet.categories(pivotConfig).map((c) => c.x),
-    datasets: resultSet.series(pivotConfig).map((s) => ({
-      label: s.title,
-      data: s.series.map((r) => r.value),
-      yValues: [s.key],
+    labels: ['Опасные', 'Возможно опасные', 'Подозрительные', 'Обычные'],
+    datasets: [{
+      label: 'Fraud Probability',
+      data: [0, 0, 0, 0],
       backgroundColor: COLORS_SERIES,
       hoverBackgroundColor: COLORS_SERIES,
-    })),
+    }],
   };
+
+  resultSet.series(pivotConfig).forEach((s) => {
+    s.series.forEach((r) => {
+      const value = r.x;
+      if (value >= 0.8) {
+        data.datasets[0].data[0] += r.value;
+      } else if (value >= 0.7) {
+        data.datasets[0].data[1] += r.value;
+      } else if (value >= 0.5) {
+        data.datasets[0].data[2] += r.value;
+      } else {
+        data.datasets[0].data[3] += r.value;
+      }
+    });
+  });
+
   const getElementAtEvent = useDrilldownCallback({
     datasets: data.datasets,
     labels: data.labels,
     pivotConfig,
     onDrilldownRequested,
   });
+
   return (
     <Pie
       type="pie"
@@ -97,53 +109,6 @@ const PieChartRenderer = ({ resultSet, pivotConfig, onDrilldownRequested }) => {
   );
 };
 
-const formatTableData = (columns, data) => {
-  function flatten(columns = []) {
-    return columns.reduce((memo, column) => {
-      if (column.children) {
-        return [...memo, ...flatten(column.children)];
-      }
-
-      return [...memo, column];
-    }, []);
-  }
-
-  const typeByIndex = flatten(columns).reduce((memo, column) => {
-    return { ...memo, [column.dataIndex]: column };
-  }, {});
-
-  function formatValue(value, { type, format } = {}) {
-    if (value == undefined) {
-      return value;
-    }
-
-    if (type === 'boolean') {
-      if (typeof value === 'boolean') {
-        return value.toString();
-      } else if (typeof value === 'number') {
-        return Boolean(value).toString();
-      }
-
-      return value;
-    }
-
-    if (type === 'number' && format === 'percent') {
-      return [parseFloat(value).toFixed(2), '%'].join('');
-    }
-
-    return value.toString();
-  }
-
-  function format(row) {
-    return Object.fromEntries(
-      Object.entries(row).map(([dataIndex, value]) => {
-        return [dataIndex, formatValue(value, typeByIndex[dataIndex])];
-      })
-    );
-  }
-
-  return data.map(format);
-};
 
 const cubejsApi = cubejs(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA3ODg0ODIsImV4cCI6MTcyMDg3NDg4Mn0.RlHLvDxfphw4kWbzj43ZpYB93AzkQiZLMIg3ZLDpQhk',
@@ -172,23 +137,16 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
 const ChartPie = () => {
   return (
     <QueryRenderer
-      query={{
-  "dimensions": [
-    "table_view.fraud_probability"
-  ],
-  "order": {
-    "table_view.count": "desc"
-  },
-  "measures": [
-    "table_view.count"
-  ],
-  "timeDimensions": [
-    {
-      "dimension": "table_view.passport_valid_to"
-    }
-  ],
-  "limit": 1000
-}}
+    query={{
+      "dimensions": [
+        "table_view.fraud_probability"
+      ],
+      "measures": [
+        "table_view.count"
+      ],
+      "limit": 1000
+    }}
+    
       cubejsApi={cubejsApi}
       resetResultSetOnChange={false}
       render={(props) => renderChart({
