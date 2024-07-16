@@ -5,13 +5,13 @@ import React from 'react';
 import { useDeepCompareMemo } from 'use-deep-compare';
 import { Table } from 'antd';
 
+// Helper function to format table data
 const formatTableData = (columns, data) => {
   function flatten(columns = []) {
     return columns.reduce((memo, column) => {
       if (column.children) {
         return [...memo, ...flatten(column.children)];
       }
-
       return [...memo, column];
     }, []);
   }
@@ -31,7 +31,6 @@ const formatTableData = (columns, data) => {
       } else if (typeof value === 'number') {
         return Boolean(value).toString();
       }
-
       return value;
     }
 
@@ -53,6 +52,7 @@ const formatTableData = (columns, data) => {
   return data.map(format);
 };
 
+// Component to render the table
 const TableRenderer = ({ resultSet, pivotConfig }) => {
   const [tableColumns, dataSource] = useDeepCompareMemo(() => {
     const columns = resultSet.tableColumns(pivotConfig);
@@ -61,16 +61,11 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
       formatTableData(columns, resultSet.tablePivot(pivotConfig)),
     ];
   }, [resultSet, pivotConfig]);
+
   return (
     <Table pagination={true} columns={tableColumns} dataSource={dataSource} />
   );
 };
-
-
-const cubejsApi = cubejs(
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA1Mjg4MzcsImV4cCI6MTcyMDYxNTIzN30.R57wAhAbaeVq8sqEL_P-yRcplGbBy2k2TVAJCwtpEec',
-  { apiUrl: 'http://localhost:4000/cubejs-api/v1' }
-);
 
 const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) => {
   if (error) {
@@ -85,51 +80,54 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
 
 };
 
+
+// Initialize Cube.js API
+const cubejsApi = cubejs(
+  process.env.REACT_APP_CUBEJS_KEY,
+  { apiUrl: process.env.REACT_APP_API_URL }
+);
+
+// Main component for rendering the fraud table
 const FroudTable = () => {
   return (
     <QueryRenderer
       query={{
-        "dimensions": [
-          "table_view.amount",
-          "table_view.operation_result",
-          "table_view.fraud_probability"
+        dimensions: [
+          'table_view.amount',
+          'table_view.operation_result',
+          'table_view.fraud_probability',
         ],
-        "order": {
-          "table_view.date": "desc"
+        order: {
+          'table_view.date': 'desc',
         },
-        "timeDimensions": [
+        timeDimensions: [
           {
-            "dimension": "table_view.date",
-            "granularity": "second"
-          }
+            dimension: 'table_view.date',
+            granularity: 'second',
+          },
         ],
-        "filters": [
+        filters: [
           {
-            "member": "table_view.fraud_probability",
-            "operator": "gt",
-            "values": [
-              "0.5"
-            ]
-          }
-        ]
+            member: 'table_view.fraud_probability',
+            operator: 'gt',
+            values: ['0.5'],
+          },
+        ],
       }}
       cubejsApi={cubejsApi}
       resetResultSetOnChange={false}
-      render={(props) => renderChart({
-        ...props,
-        chartType: 'table',
-        pivotConfig: {
-          "x": [
-            "amount",
-            "operation_result",
-            "fraud_probability",
-            "date.day"
-          ],
-          "y": [],
-          "fillMissingDates": true,
-          "joinDateRange": false
-        }
-      })}
+      render={(props) =>
+        renderChart({
+          ...props,
+          chartType: 'table',
+          pivotConfig: {
+            x: ['amount', 'operation_result', 'fraud_probability', 'date.day'],
+            y: [],
+            fillMissingDates: true,
+            joinDateRange: false,
+          },
+        })
+      }
     />
   );
 };

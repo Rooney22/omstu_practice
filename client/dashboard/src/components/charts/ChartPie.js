@@ -1,9 +1,9 @@
 import cubejs from '@cubejs-client/core';
 import { QueryRenderer } from '@cubejs-client/react';
-import { Spin } from 'antd';
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
-
+import { Spin } from 'antd';
+// Define colors for the pie chart
 const COLORS_SERIES = [
   '#5b8ff9',
   '#5ad8a6',
@@ -17,6 +17,7 @@ const COLORS_SERIES = [
   '#fe99c3',
 ];
 
+// Common options for the chart
 const commonOptions = {
   maintainAspectRatio: false,
   interaction: {
@@ -39,6 +40,8 @@ const commonOptions = {
     },
   },
 };
+
+// Custom hook for handling drilldown interactions
 const useDrilldownCallback = ({
   datasets,
   labels,
@@ -52,28 +55,27 @@ const useDrilldownCallback = ({
       const xValues = [labels[index]];
 
       if (typeof onDrilldownRequested === 'function') {
-        onDrilldownRequested(
-          {
-            xValues,
-          },
-        );
+        onDrilldownRequested({
+          xValues,
+        });
       }
     },
     [labels, onDrilldownRequested]
   );
 };
 
-
+// Component for rendering the pie chart
 const PieChartRenderer = ({ resultSet, pivotConfig, onDrilldownRequested }) => {
-
   const data = {
-    labels: ['Опасные', 'Возможно опасные', 'Подозрительные', 'Обычные'],
-    datasets: [{
-      label: 'Fraud Probability',
-      data: [0, 0, 0, 0],
-      backgroundColor: COLORS_SERIES,
-      hoverBackgroundColor: COLORS_SERIES,
-    }],
+    labels: ['Dangerous', 'Potentially Dangerous', 'Suspicious', 'Normal'],
+    datasets: [
+      {
+        label: 'Fraud Probability',
+        data: [0, 0, 0, 0],
+        backgroundColor: COLORS_SERIES,
+        hoverBackgroundColor: COLORS_SERIES,
+      },
+    ],
   };
 
   resultSet.series(pivotConfig).forEach((s) => {
@@ -108,12 +110,6 @@ const PieChartRenderer = ({ resultSet, pivotConfig, onDrilldownRequested }) => {
   );
 };
 
-
-const cubejsApi = cubejs(
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA3ODg0ODIsImV4cCI6MTcyMDg3NDg4Mn0.RlHLvDxfphw4kWbzj43ZpYB93AzkQiZLMIg3ZLDpQhk',
-  { apiUrl: 'http://localhost:4000/cubejs-api/v1' }
-);
-
 const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) => {
   if (error) {
     return <div>{error.toString()}</div>;
@@ -133,36 +129,36 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
 
 };
 
+// Initialize the Cube.js API
+const cubejsApi = cubejs(
+  process.env.REACT_APP_CUBEJS_KEY,
+  { apiUrl: process.env.REACT_APP_API_URL }
+);
+
+// Component that renders the pie chart using Cube.js
 const ChartPie = () => {
   return (
     <QueryRenderer
       query={{
-        "dimensions": [
-          "table_view.fraud_probability"
-        ],
-        "measures": [
-          "table_view.count"
-        ],
-        "limit": 1000
+        dimensions: ['table_view.fraud_probability'],
+        measures: ['table_view.count'],
+        limit: 1000,
       }}
-
       cubejsApi={cubejsApi}
       resetResultSetOnChange={false}
-      render={(props) => renderChart({
-        ...props,
-        chartType: 'pie',
-        pivotConfig: {
-          "x": [
-            "table_view.fraud_probability"
-          ],
-          "y": [
-            "measures"
-          ],
-          "fillMissingDates": true,
-          "joinDateRange": false,
-          "limit": 1000
-        }
-      })}
+      render={(props) =>
+        renderChart({
+          ...props,
+          chartType: 'pie',
+          pivotConfig: {
+            x: ['table_view.fraud_probability'],
+            y: ['measures'],
+            fillMissingDates: true,
+            joinDateRange: false,
+            limit: 1000,
+          },
+        })
+      }
     />
   );
 };

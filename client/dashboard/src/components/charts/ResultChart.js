@@ -5,6 +5,7 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useDeepCompareMemo } from 'use-deep-compare';
 
+// Define colors for the bar chart
 const COLORS_SERIES = [
   '#5b8ff9',
   '#5ad8a6',
@@ -18,6 +19,7 @@ const COLORS_SERIES = [
   '#fe99c3',
 ];
 
+// Common options for the chart
 const commonOptions = {
   maintainAspectRatio: false,
   interaction: {
@@ -40,6 +42,7 @@ const commonOptions = {
   },
 };
 
+// Custom hook for handling drilldown interactions
 const useDrilldownCallback = ({
   labels,
   onDrilldownRequested,
@@ -51,17 +54,16 @@ const useDrilldownCallback = ({
       const xValues = [labels[index]];
 
       if (typeof onDrilldownRequested === 'function') {
-        onDrilldownRequested(
-          {
-            xValues
-          },
-        );
+        onDrilldownRequested({
+          xValues,
+        });
       }
     },
     [labels, onDrilldownRequested]
   );
 };
 
+// Component for rendering the bar chart
 const BarChartRenderer = ({ resultSet, pivotConfig, onDrilldownRequested }) => {
   const datasets = useDeepCompareMemo(
     () =>
@@ -101,11 +103,6 @@ const BarChartRenderer = ({ resultSet, pivotConfig, onDrilldownRequested }) => {
   );
 };
 
-const cubejsApi = cubejs(
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MjA1Mjg4MzcsImV4cCI6MTcyMDYxNTIzN30.R57wAhAbaeVq8sqEL_P-yRcplGbBy2k2TVAJCwtpEec',
-  { apiUrl: 'http://localhost:4000/cubejs-api/v1' }
-);
-
 const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) => {
   if (error) {
     return <div>{error.toString()}</div>;
@@ -125,36 +122,37 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
 
 };
 
+// Initialize the Cube.js API
+const cubejsApi = cubejs(
+  process.env.REACT_APP_CUBEJS_KEY,
+  { apiUrl: process.env.REACT_APP_API_URL }
+);
+
+// Component that renders the bar chart using Cube.js
 const ResultChart = () => {
   return (
     <QueryRenderer
       query={{
-        "dimensions": [
-          "table_view.operation_result"
-        ],
-        "order": {
-          "table_view.passport_valid_to": "asc"
+        dimensions: ['table_view.operation_result'],
+        order: {
+          'table_view.passport_valid_to': 'asc',
         },
-        "measures": [
-          "table_view.count"
-        ]
+        measures: ['table_view.count'],
       }}
       cubejsApi={cubejsApi}
       resetResultSetOnChange={false}
-      render={(props) => renderChart({
-        ...props,
-        chartType: 'bar',
-        pivotConfig: {
-          "x": [
-            "table_view.operation_result"
-          ],
-          "y": [
-            "measures"
-          ],
-          "fillMissingDates": true,
-          "joinDateRange": false
-        }
-      })}
+      render={(props) =>
+        renderChart({
+          ...props,
+          chartType: 'bar',
+          pivotConfig: {
+            x: ['table_view.operation_result'],
+            y: ['measures'],
+            fillMissingDates: true,
+            joinDateRange: false,
+          },
+        })
+      }
     />
   );
 };

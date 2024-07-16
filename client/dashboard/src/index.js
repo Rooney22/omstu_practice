@@ -9,10 +9,11 @@ import cube from '@cubejs-client/core';
 import AdminLayout from "layouts/Admin.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-  
+
+// add cubeApi for data analysis
 const cubeApi = cube( 
   process.env.REACT_APP_CUBEJS_KEY, 
-  { apiUrl: process.env.REACT_APP_API_URL } 
+  { apiUrl: process.env.REACT_APP_CUBEJS_HOSTNAME} 
 ); 
 
 root.render(

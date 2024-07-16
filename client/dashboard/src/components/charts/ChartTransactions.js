@@ -114,8 +114,8 @@ const LineChartRenderer = ({
 
 
 const cubejsApi = cube(
-  'eyJhbciOiJIUzI1NiR5cCI6IkpXVCJ9.eyJleHAiOjE3MjI0NzAzOTksImlzcyI6ImN1YmVjbG91ZCJ9.btLWvzpZIOSCOoZLMzhPAhA5Ubi6NOvhwmiITdSXdfk',
-  { apiUrl: 'https://gold-sawfish.aws-us-east-1.cubecloudapp.dev/cubejs-api/v1' }
+  process.env.REACT_APP_CUBEJS_KEY, 
+  { apiUrl: process.env.REACT_APP_API_URL } 
 );
 const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) => {
 

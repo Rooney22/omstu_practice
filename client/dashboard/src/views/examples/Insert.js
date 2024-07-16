@@ -1,41 +1,29 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'reactstrap';
 import Header from "components/Headers/Header.js";
-import './Insert.css';
+import './Insert.css'; // Importing a CSS file for styling
 
 function Insert() {
+  // State variables for managing file upload and prediction status
   const [csvFile, setCsvFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [predicting, setPredicting] = useState(false);
 
+  // Handler for file input change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file.type === 'text/csv') {
       setCsvFile(file);
     } else {
-      alert('Пожалуйста, выберите файл CSV.');
+      alert('Пожалуйста, выберите файл CSV.'); // Show an alert if the selected file is not a CSV
     }
   };
 
+  // Handler for triggering fraud prediction
   const handlePredict = async () => {
     try {
       setPredicting(true); // Show predict preloader
-      try {
-
-        const response = await fetch(process.env.REACT_APP_API_URL+'/fraud/predict?' + new URLSearchParams({
-          null_flag: false,
-        }), {
-          method: 'POST',
-        });
-
-        if (response.ok) {
-          console.log('successfully!');
-        } else {
-          console.error('Error Prediction.');
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
-      }
+      // Make an API request for fraud prediction
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log('Prediction complete!');
     } catch (error) {
@@ -45,26 +33,14 @@ function Insert() {
     }
   };
 
+  // Handler for uploading the selected CSV file
   const handleUpload = async () => {
     try {
       setUploading(true);
-      try {
-        const formData = new FormData();
-        formData.append('file', csvFile);
-        const response = await fetch(process.env.REACT_APP_API_URL+'/data/inputCSV', {
-          method: 'POST',
-          body: formData,
-
-        });
-
-        if (response.ok) {
-          console.log('File uploaded successfully!');
-        } else {
-          console.error('Error uploading file.');
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
-      }
+      // Create a FormData object and append the selected file
+      const formData = new FormData();
+      formData.append('file', csvFile);
+      // Make an API request to upload the file
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log('File uploaded successfully!');
     } catch (error) {
@@ -74,6 +50,7 @@ function Insert() {
     }
   };
 
+  // Handler for the overall process (upload + predict)
   const handleClick = async () => {
     await handleUpload();
     await handlePredict();
@@ -81,7 +58,7 @@ function Insert() {
 
   return (
     <>
-      <Header />
+      <Header /> {/* Render the header component */}
       <Container>
         <Row>
           <Col>

@@ -8,7 +8,7 @@ import {
   Col,
 } from "reactstrap";
 
-// core components
+// Import core components and chart options
 import {
   chartOptions,
   parseOptions,
@@ -21,6 +21,7 @@ import ChartPie from "components/charts/ChartPie.js";
 import ResultChart from "components/charts/ResultChart.js";
 
 const Index = (props) => {
+  // Initialize Chart.js options if the Chart object is available
   if (window.Chart) {
     parseOptions(Chart, chartOptions());
   }
@@ -43,6 +44,7 @@ const Index = (props) => {
                 </Row>
               </CardHeader>
               <div className="chart">
+                {/* Render the transaction chart */}
                 <ChartTrasactions />
               </div>
             </Card>
@@ -60,7 +62,7 @@ const Index = (props) => {
                 </Row>
               </CardHeader>
               <CardBody>
-                {/* Chart */}
+                {/* Render the pie chart */}
                 <div className="chart">
                   <ChartPie />
                 </div>
@@ -74,6 +76,7 @@ const Index = (props) => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
+                    {/* Fraud transactions section */}
                     <h3 className="mb-0">Последние мошеннические операции</h3>
                   </div>
                 </Row>
