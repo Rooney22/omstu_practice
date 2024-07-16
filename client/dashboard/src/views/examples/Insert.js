@@ -22,7 +22,7 @@ function Insert() {
       setPredicting(true); // Show predict preloader
       try {
 
-        const response = await fetch('https://omstuback-production.up.railway.app/fraud/predict?' + new URLSearchParams({
+        const response = await fetch(process.env.REACT_APP_API_URL+'/fraud/predict?' + new URLSearchParams({
           null_flag: false,
         }), {
           method: 'POST',
@@ -51,7 +51,7 @@ function Insert() {
       try {
         const formData = new FormData();
         formData.append('file', csvFile);
-        const response = await fetch('https://omstuback-production.up.railway.app/data/inputCSV', {
+        const response = await fetch(process.env.REACT_APP_API_URL+'/data/inputCSV', {
           method: 'POST',
           body: formData,
 
