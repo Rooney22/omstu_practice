@@ -9,6 +9,7 @@ from src.models.operation_type import OperationType
 from src.models.terminal_type import TerminalType
 from src.models.client import Client
 from sqlalchemy import select
+from sqlalchemy.exc import DBAPIError
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -28,50 +29,53 @@ class DataService:
         }
         async with Session() as session:
             for index, row in df.iterrows():
-                check = await self.check_rows(row)
-                if not check:
-                    continue
-                transaction_id = row['id_transaction']
-                transaction = await (session.get(Transaction, transaction_id))
-                if transaction:
-                    continue
-                transaction_date = datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S")
-                card_number = row['card']
-                if row['passport_valid_to'] == 'бессрочно':
-                    passport_valid_to = datetime.now() + relativedelta(years=100)
-                else:
-                    passport_valid_to = datetime.strptime(row['passport_valid_to'], "%Y-%m-%d")
-                card = await session.get(Card, card_number)
-                if not card:
-                    card = await self.create_card(card_number, row['phone'], row['client'], row['passport'],
-                                                  passport_valid_to, row['date_of_birth'], session)
-                operation_result = operation_res_map[row['operation_result']]
-                q = (select(Operation)
-                     .where(Operation.operation_type.has(OperationType.operation_type_name == row['operation_type']))
-                     .where(Operation.operation_result == operation_result)
-                     .where(Operation.operation_amount == row['amount']))
-                result = await session.execute(q)
-                operation = result.scalar_one_or_none()
-                if not operation:
-                    operation = await self.create_operation(row['operation_type'], operation_result, row['amount'],
-                                                            session)
-                q = (select(Terminal)
-                     .where(Terminal.terminal_type
-                            .has(TerminalType.terminal_type_name == row['terminal_type']))
-                     .where(Terminal.city.has(City.city_name == row['city']))
-                     .where(Terminal.terminal_address == row['address']))
-                result = await session.execute(q)
-                terminal = result.scalar_one_or_none()
-                if not terminal:
-                    terminal = await self.create_terminal(row['terminal_type'], row['city'], row['address'],
-                                                          session)
-                transaction = Transaction(transaction_id=transaction_id,
-                                          transaction_date=transaction_date,
-                                          card_number=card_number,
-                                          operation_id=operation.operation_id,
-                                          terminal_id=terminal.terminal_id)
-                session.add(transaction)
-                await session.flush()
+                try:
+                    check = await self.check_rows(row)
+                    if not check:
+                        continue
+                    transaction_id = row['id_transaction']
+                    transaction = await (session.get(Transaction, transaction_id))
+                    if transaction:
+                        continue
+                    transaction_date = datetime.strptime(row['date'], "%Y-%m-%d %H:%M:%S")
+                    card_number = row['card']
+                    if row['passport_valid_to'] == 'бессрочно':
+                        passport_valid_to = datetime.now() + relativedelta(years=100)
+                    else:
+                        passport_valid_to = datetime.strptime(row['passport_valid_to'], "%Y-%m-%d")
+                    card = await session.get(Card, card_number)
+                    if not card:
+                        card = await self.create_card(card_number, row['phone'], row['client'], row['passport'],
+                                                      passport_valid_to, row['date_of_birth'], session)
+                    operation_result = operation_res_map[row['operation_result']]
+                    q = (select(Operation)
+                         .where(Operation.operation_type.has(OperationType.operation_type_name == row['operation_type']))
+                         .where(Operation.operation_result == operation_result)
+                         .where(Operation.operation_amount == row['amount']))
+                    result = await session.execute(q)
+                    operation = result.scalar_one_or_none()
+                    if not operation:
+                        operation = await self.create_operation(row['operation_type'], operation_result, row['amount'],
+                                                                session)
+                    q = (select(Terminal)
+                         .where(Terminal.terminal_type
+                                .has(TerminalType.terminal_type_name == row['terminal_type']))
+                         .where(Terminal.city.has(City.city_name == row['city']))
+                         .where(Terminal.terminal_address == row['address']))
+                    result = await session.execute(q)
+                    terminal = result.scalar_one_or_none()
+                    if not terminal:
+                        terminal = await self.create_terminal(row['terminal_type'], row['city'], row['address'],
+                                                              session)
+                    transaction = Transaction(transaction_id=transaction_id,
+                                              transaction_date=transaction_date,
+                                              card_number=card_number,
+                                              operation_id=operation.operation_id,
+                                              terminal_id=terminal.terminal_id)
+                    session.add(transaction)
+                    await session.flush()
+                except DBAPIError:
+                    await session.rollback()
             await session.commit()
 
     @staticmethod
