@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Button } from 'reactstrap';
 import Header from "components/Headers/Header.js";
-import './Insert.css'; 
+import './Insert.css';
 
 function Insert() {
   const [csvFile, setCsvFile] = useState(null);
-  const [uploading, setUploading] = useState(false); 
-  const [predicting, setPredicting] = useState(false); 
+  const [uploading, setUploading] = useState(false);
+  const [predicting, setPredicting] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -24,10 +24,10 @@ function Insert() {
 
         const response = await fetch('https://omstuback-production.up.railway.app/fraud/predict?' + new URLSearchParams({
           null_flag: false,
-  }), {
+        }), {
           method: 'POST',
         });
-  
+
         if (response.ok) {
           console.log('successfully!');
         } else {
@@ -41,7 +41,7 @@ function Insert() {
     } catch (error) {
       console.error('An error occurred during prediction:', error);
     } finally {
-      setPredicting(false); 
+      setPredicting(false);
     }
   };
 
@@ -54,9 +54,9 @@ function Insert() {
         const response = await fetch('https://omstuback-production.up.railway.app/data/inputCSV', {
           method: 'POST',
           body: formData,
-          
+
         });
-  
+
         if (response.ok) {
           console.log('File uploaded successfully!');
         } else {
@@ -70,7 +70,7 @@ function Insert() {
     } catch (error) {
       console.error('An error occurred during file upload:', error);
     } finally {
-      setUploading(false); 
+      setUploading(false);
     }
   };
 
@@ -97,7 +97,7 @@ function Insert() {
             <Button className="InsertButton" onClick={handleClick}>
               Отправить
             </Button>
-            <br/>
+            <br />
             {uploading && <p>Uploading... </p>}
             {predicting && <p>Predicting... </p>}
           </Col>

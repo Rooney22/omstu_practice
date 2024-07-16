@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import cube from '@cubejs-client/core'; 
+import cube from '@cubejs-client/core';
 import { QueryRenderer } from '@cubejs-client/react';
 import { Table, Spin } from 'antd';
 import { useDeepCompareMemo } from 'use-deep-compare';
@@ -42,12 +42,12 @@ const formatTableData = (columns, data) => {
     if (type === 'number' && format === 'percent') {
       return [parseFloat(value).toFixed(2), '%'].join('');
     }
-    if(value !== null){
+    if (value !== null) {
       return value.toString();
-    }else{
+    } else {
       return "null";
     }
-    
+
   }
 
   function format(row) {
@@ -77,14 +77,14 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
   });
 
   const [tableColumns, dataSource] = useDeepCompareMemo(() => {
-    
+
     const columns = resultSet.tableColumns(pivotConfig);
     return [
       columns,
       formatTableData(columns, resultSet.tablePivot(pivotConfig)),
     ];
   }, [resultSet, pivotConfig]);
-  
+
   const handleFilterChange = (filterName, value) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -115,16 +115,16 @@ const TableRenderer = ({ resultSet, pivotConfig }) => {
   };
 
   const rowClassName = (record, index) => {
-    if (record['table_view.fraud_probability'] >= 0.8 ){
+    if (record['table_view.fraud_probability'] >= 0.8) {
       return 'red-row';
-    }else if (record['table_view.fraud_probability'] >= 0.7 && record['table_view.fraud_probability'] < 0.8){
+    } else if (record['table_view.fraud_probability'] >= 0.7 && record['table_view.fraud_probability'] < 0.8) {
       return 'orange-row';
-    }else if(record['table_view.fraud_probability'] > 0.5 && record['table_view.fraud_probability'] < 0.7){
+    } else if (record['table_view.fraud_probability'] > 0.5 && record['table_view.fraud_probability'] < 0.7) {
       return 'yellow-row';
-    }else{
+    } else {
       return '';
     }
-    
+
   };
 
   return (
@@ -250,56 +250,56 @@ const Tables = () => {
     <>
       <Header />
       <Container className="mt-1" fluid>
-      <QueryRenderer
-        query={{
-          "dimensions": [
-            "table_view.amount",
-            "table_view.operation_result",
-            "table_view.card",
-            "table_view.client",
-            "table_view.passport",
-            "table_view.phone",
-            "table_view.operation_type",
-            "table_view.terminal_type",
-            "table_view.city",
-            "table_view.terminal",
-            "table_view.passport_valid_to",
-            "table_view.date_of_birth",
-            "table_view.date",
-            "table_view.fraud_probability"
-          ],
-          "order": {
-            "table_view.amount": "asc"
-          }
-        }}
-        cubejsApi={cubejsApi}
-        resetResultSetOnChange={false}
-        render={(props) => renderChart({
-          ...props,
-          chartType: 'table',
-          pivotConfig: {
-            "x": [
-              "amount",
-              "operation_result",
-              "card",
-              "client",
-              "passport",
-              "phone",
-              "operation_type",
-              "terminal_type",
-              "city",
-              "terminal",
-              "passport_valid_to",
-              "date_of_birth",
-              "date",
-              "fraud_probability"
+        <QueryRenderer
+          query={{
+            "dimensions": [
+              "table_view.amount",
+              "table_view.operation_result",
+              "table_view.card",
+              "table_view.client",
+              "table_view.passport",
+              "table_view.phone",
+              "table_view.operation_type",
+              "table_view.terminal_type",
+              "table_view.city",
+              "table_view.terminal",
+              "table_view.passport_valid_to",
+              "table_view.date_of_birth",
+              "table_view.date",
+              "table_view.fraud_probability"
             ],
-            "y": [],
-            "fillMissingDates": false,
-            "joinDateRange": false,
-          }
-        })}
-      />
+            "order": {
+              "table_view.amount": "asc"
+            }
+          }}
+          cubejsApi={cubejsApi}
+          resetResultSetOnChange={false}
+          render={(props) => renderChart({
+            ...props,
+            chartType: 'table',
+            pivotConfig: {
+              "x": [
+                "amount",
+                "operation_result",
+                "card",
+                "client",
+                "passport",
+                "phone",
+                "operation_type",
+                "terminal_type",
+                "city",
+                "terminal",
+                "passport_valid_to",
+                "date_of_birth",
+                "date",
+                "fraud_probability"
+              ],
+              "y": [],
+              "fillMissingDates": false,
+              "joinDateRange": false,
+            }
+          })}
+        />
       </Container>
     </>
   );

@@ -3,7 +3,7 @@ import { Spin } from 'antd';
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useDeepCompareMemo } from 'use-deep-compare';
-import cube from '@cubejs-client/core'; 
+import cube from '@cubejs-client/core';
 const COLORS_SERIES = [
   '#5b8ff9',
   '#5ad8a6',
@@ -36,10 +36,10 @@ const commonOptions = {
         minRotation: 0,
       }
     },
-    y: { 
+    y: {
       beginAtZero: true, // Set to true if you want the y-axis to start from zero
       suggestedMax: 20000, // Adjust the maximum value based on your data
-      
+
     },
   },
 };
@@ -63,7 +63,6 @@ const useDrilldownCallback = ({
             xValues,
             yValues,
           },
-          pivotConfig
         );
       }
     },
@@ -130,12 +129,12 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
   }
 
   return (
-  <LineChartRenderer
-    resultSet={resultSet}
-    pivotConfig={pivotConfig}
-    onDrilldownRequested={onDrilldownRequested}
-  />
-);
+    <LineChartRenderer
+      resultSet={resultSet}
+      pivotConfig={pivotConfig}
+      onDrilldownRequested={onDrilldownRequested}
+    />
+  );
 
 };
 
@@ -143,34 +142,34 @@ const ChartTrasactions = () => {
   return (
     <QueryRenderer
       query={{
-  "order": {
-    "transactions.transaction_date": "asc"
-  },
-  "timeDimensions": [
-    {
-      "dimension": "transactions.transaction_date",
-      "granularity": "day"
-    }
-  ],
-  "measures": [
-    "transactions.count"
-  ]
-}}
+        "order": {
+          "transactions.transaction_date": "asc"
+        },
+        "timeDimensions": [
+          {
+            "dimension": "transactions.transaction_date",
+            "granularity": "day"
+          }
+        ],
+        "measures": [
+          "transactions.count"
+        ]
+      }}
       cubejsApi={cubejsApi}
       resetResultSetOnChange={true}
       render={(props) => renderChart({
         ...props,
         chartType: 'line',
         pivotConfig: {
-  "x": [
-    "transactions.transaction_date.day"
-  ],
-  "y": [
-    "measures"
-  ],
-  "fillMissingDates": false,
-  "joinDateRange": false
-}
+          "x": [
+            "transactions.transaction_date.day"
+          ],
+          "y": [
+            "measures"
+          ],
+          "fillMissingDates": false,
+          "joinDateRange": false
+        }
       })}
     />
   );

@@ -1,9 +1,8 @@
 import React from "react";
 import { useLocation, Route, Routes, Navigate } from "react-router-dom";
+
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
-
-
 import routes from "routes.js";
 
 const Admin = (props) => {

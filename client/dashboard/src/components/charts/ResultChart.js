@@ -2,9 +2,8 @@ import cubejs from '@cubejs-client/core';
 import { QueryRenderer } from '@cubejs-client/react';
 import { Spin } from 'antd';
 import React from 'react';
-import { Bar} from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import { useDeepCompareMemo } from 'use-deep-compare';
-
 
 const COLORS_SERIES = [
   '#5b8ff9',
@@ -48,7 +47,7 @@ const useDrilldownCallback = ({
   return React.useCallback(
     (elements) => {
       if (elements.length <= 0) return;
-      const {index } = elements[0];
+      const { index } = elements[0];
       const xValues = [labels[index]];
 
       if (typeof onDrilldownRequested === 'function') {
@@ -59,7 +58,7 @@ const useDrilldownCallback = ({
         );
       }
     },
-    [ labels, onDrilldownRequested]
+    [labels, onDrilldownRequested]
   );
 };
 
@@ -117,48 +116,47 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
   }
 
   return (
-  <BarChartRenderer
-    resultSet={resultSet}
-    pivotConfig={pivotConfig}
-    onDrilldownRequested={onDrilldownRequested}
-  />
-);
+    <BarChartRenderer
+      resultSet={resultSet}
+      pivotConfig={pivotConfig}
+      onDrilldownRequested={onDrilldownRequested}
+    />
+  );
 
 };
 
 const ResultChart = () => {
-    return (
-        <QueryRenderer
-          query={{
-      "dimensions": [
-        "table_view.operation_result"
-      ],
-      "order": {
-        "table_view.passport_valid_to": "asc"
-      },
-      "measures": [
-        "table_view.count"
-      ]
-    }}
-          cubejsApi={cubejsApi}
-          resetResultSetOnChange={false}
-          render={(props) => renderChart({
-            ...props,
-            chartType: 'bar',
-            pivotConfig: {
-      "x": [
-        "table_view.operation_result"
-      ],
-      "y": [
-        "measures"
-      ],
-      "fillMissingDates": true,
-      "joinDateRange": false
-    }
-          })}
-        />
-      );
+  return (
+    <QueryRenderer
+      query={{
+        "dimensions": [
+          "table_view.operation_result"
+        ],
+        "order": {
+          "table_view.passport_valid_to": "asc"
+        },
+        "measures": [
+          "table_view.count"
+        ]
+      }}
+      cubejsApi={cubejsApi}
+      resetResultSetOnChange={false}
+      render={(props) => renderChart({
+        ...props,
+        chartType: 'bar',
+        pivotConfig: {
+          "x": [
+            "table_view.operation_result"
+          ],
+          "y": [
+            "measures"
+          ],
+          "fillMissingDates": true,
+          "joinDateRange": false
+        }
+      })}
+    />
+  );
 };
 
 export default ResultChart;
-      

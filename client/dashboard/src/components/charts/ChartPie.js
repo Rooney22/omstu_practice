@@ -24,7 +24,7 @@ const commonOptions = {
   },
   plugins: {
     legend: {
-      position: 'top', 
+      position: 'top',
       display: true,
     },
   },
@@ -56,17 +56,16 @@ const useDrilldownCallback = ({
           {
             xValues,
           },
-          pivotConfig
         );
       }
     },
-    [datasets, labels, onDrilldownRequested]
+    [labels, onDrilldownRequested]
   );
 };
 
 
 const PieChartRenderer = ({ resultSet, pivotConfig, onDrilldownRequested }) => {
-  
+
   const data = {
     labels: ['Опасные', 'Возможно опасные', 'Подозрительные', 'Обычные'],
     datasets: [{
@@ -125,44 +124,44 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
   }
 
   return (
-  <PieChartRenderer
-    resultSet={resultSet}
-    pivotConfig={pivotConfig}
-    onDrilldownRequested={onDrilldownRequested}
-  />
-);
+    <PieChartRenderer
+      resultSet={resultSet}
+      pivotConfig={pivotConfig}
+      onDrilldownRequested={onDrilldownRequested}
+    />
+  );
 
 };
 
 const ChartPie = () => {
   return (
     <QueryRenderer
-    query={{
-      "dimensions": [
-        "table_view.fraud_probability"
-      ],
-      "measures": [
-        "table_view.count"
-      ],
-      "limit": 1000
-    }}
-    
+      query={{
+        "dimensions": [
+          "table_view.fraud_probability"
+        ],
+        "measures": [
+          "table_view.count"
+        ],
+        "limit": 1000
+      }}
+
       cubejsApi={cubejsApi}
       resetResultSetOnChange={false}
       render={(props) => renderChart({
         ...props,
         chartType: 'pie',
         pivotConfig: {
-  "x": [
-    "table_view.fraud_probability"
-  ],
-  "y": [
-    "measures"
-  ],
-  "fillMissingDates": true,
-  "joinDateRange": false,
-  "limit": 1000
-}
+          "x": [
+            "table_view.fraud_probability"
+          ],
+          "y": [
+            "measures"
+          ],
+          "fillMissingDates": true,
+          "joinDateRange": false,
+          "limit": 1000
+        }
       })}
     />
   );

@@ -3,7 +3,7 @@ import { QueryRenderer } from '@cubejs-client/react';
 import { Spin } from 'antd';
 import React from 'react';
 import { useDeepCompareMemo } from 'use-deep-compare';
-import {Table } from 'antd';
+import { Table } from 'antd';
 
 const formatTableData = (columns, data) => {
   function flatten(columns = []) {
@@ -81,7 +81,7 @@ const renderChart = ({ resultSet, error, pivotConfig, onDrilldownRequested }) =>
     return <Spin />;
   }
 
-  return <TableRenderer resultSet={resultSet} pivotConfig={pivotConfig}  />;
+  return <TableRenderer resultSet={resultSet} pivotConfig={pivotConfig} />;
 
 };
 
@@ -89,46 +89,46 @@ const FroudTable = () => {
   return (
     <QueryRenderer
       query={{
-  "dimensions": [
-    "table_view.amount",
-    "table_view.operation_result",
-    "table_view.fraud_probability"
-  ],
-  "order": {
-    "table_view.date": "desc"
-  },
-  "timeDimensions": [
-    {
-      "dimension": "table_view.date",
-      "granularity": "second"
-    }
-  ],
-  "filters": [
-    {
-      "member": "table_view.fraud_probability",
-      "operator": "gt",
-      "values": [
-        "0.5"
-      ]
-    }
-  ]
-}}
+        "dimensions": [
+          "table_view.amount",
+          "table_view.operation_result",
+          "table_view.fraud_probability"
+        ],
+        "order": {
+          "table_view.date": "desc"
+        },
+        "timeDimensions": [
+          {
+            "dimension": "table_view.date",
+            "granularity": "second"
+          }
+        ],
+        "filters": [
+          {
+            "member": "table_view.fraud_probability",
+            "operator": "gt",
+            "values": [
+              "0.5"
+            ]
+          }
+        ]
+      }}
       cubejsApi={cubejsApi}
       resetResultSetOnChange={false}
       render={(props) => renderChart({
         ...props,
         chartType: 'table',
         pivotConfig: {
-  "x": [
-    "amount",
-    "operation_result",
-    "fraud_probability",
-    "date.day"
-  ],
-  "y": [],
-  "fillMissingDates": true,
-  "joinDateRange": false
-}
+          "x": [
+            "amount",
+            "operation_result",
+            "fraud_probability",
+            "date.day"
+          ],
+          "y": [],
+          "fillMissingDates": true,
+          "joinDateRange": false
+        }
       })}
     />
   );

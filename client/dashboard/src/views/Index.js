@@ -1,8 +1,4 @@
-
 import Chart from "chart.js";
-import ChartTrasactions from "components/charts/ChartTransactions.js";
-import ChartPie from "components/charts/ChartPie.js";
-import ResultChart from "components/charts/ResultChart.js"; 
 import {
   Card,
   CardHeader,
@@ -20,12 +16,14 @@ import {
 
 import Header from "components/Headers/Header.js";
 import FroudTable from "./examples/FroudTable";
+import ChartTrasactions from "components/charts/ChartTransactions.js";
+import ChartPie from "components/charts/ChartPie.js";
+import ResultChart from "components/charts/ResultChart.js";
 
 const Index = (props) => {
   if (window.Chart) {
     parseOptions(Chart, chartOptions());
   }
-
 
   return (
     <>
@@ -40,12 +38,12 @@ const Index = (props) => {
                     <h6 className="text-uppercase text-light ls-1 mb-1">
                       Транзакции
                     </h6>
-                  <h2 className="text-uppercase text-light ls-1 mb-1">Всего транзакций</h2>
+                    <h2 className="text-uppercase text-light ls-1 mb-1">Всего транзакций</h2>
                   </div>
                 </Row>
               </CardHeader>
               <div className="chart">
-              <ChartTrasactions/>
+                <ChartTrasactions />
               </div>
             </Card>
           </Col>
@@ -64,7 +62,7 @@ const Index = (props) => {
               <CardBody>
                 {/* Chart */}
                 <div className="chart">
-                  <ChartPie/>
+                  <ChartPie />
                 </div>
               </CardBody>
             </Card>
@@ -80,12 +78,12 @@ const Index = (props) => {
                   </div>
                 </Row>
               </CardHeader>
-              <FroudTable/>
+              <FroudTable />
             </Card>
           </Col>
           <Col xl="4">
             <Card className="shadow">
-            <CardHeader className="bg-transparent">
+              <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col ">
                     <h6 className="text-uppercase text-muted ls-1 mb-1">
@@ -97,8 +95,8 @@ const Index = (props) => {
               </CardHeader>
               <br></br>
               <div className="chart">
-              <ResultChart/>
-                </div>
+                <ResultChart />
+              </div>
             </Card>
           </Col>
         </Row>
