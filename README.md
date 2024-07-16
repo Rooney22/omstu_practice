@@ -47,3 +47,6 @@
 ## Внешний вид сервиса
 
 ![Внешний вид сервиса](utils/images/view.jpg)
+
+Инференс
+[ТЫК](https://fraud-lime.vercel.app/#/admin/index)
